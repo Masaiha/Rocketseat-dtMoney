@@ -13,19 +13,27 @@ createServer({
           id: 1,
           title: 'Tansaction 1',
           amount: 400,
-          category: 'Food',
+          category: 'deposit',
           createdAt: new Date()
         },
         {
           id: 2,
           title: 'Tansaction 2',
           amount: 200,
-          category: 'Food',
+          category: 'withdraw',
           createdAt: new Date()
         }
       ]
     })
-  }
+
+    this.post('/transactions', (shema, request) => {
+      const data = JSON.parse(request.requestBody);
+
+      return data;
+    })
+
+
+  } 
 });
 
 ReactDOM.render(
