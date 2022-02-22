@@ -10,13 +10,22 @@ interface Transaction {
       createAt: string
 }
 
-export const TransactionsContext = createContext<Transaction[]>([]);
+//Abaixo duas formas de criar um objeto com base em outro
+type TransactionInput = Omit<Transaction, 'id' | 'createAt'>;
+type TransactionInput2 = Pick<Transaction, 'title' | 'amount' | 'type' | 'category'>; 
 
-interface TransactionsProviderChindrenProps {
+interface TransactionsProviderChildrenProps {
       children: ReactNode;
 } 
 
-export function TransactionsProvider({ children }: TransactionsProviderChindrenProps){
+interface TransactionsContextData {
+      transactions: Transaction[],
+       createTransaction: (transaction: TransactionInput) => Promise<void>;
+}
+
+export const TransactionsContext = createContext<TransactionsContextData>({} as TransactionsContextData);
+
+export function TransactionsProvider({ children }: TransactionsProviderChildrenProps){
       const [transactions, setTransactions] = useState<Transaction[]>([]);
 
       useEffect(() => {
@@ -24,8 +33,17 @@ export function TransactionsProvider({ children }: TransactionsProviderChindrenP
                   .then(response => setTransactions(response.data.transactions))
       }, []);
 
+      async function createTransaction(transactionInput : TransactionInput){
+           const response = await api.post('/transactions', {
+                 ...transactionInput,
+                 createAt: new Date()
+           });
+           const { transaction } = response.data;
+           setTransactions([...transactions, transaction]);
+      }
+
       return (
-            <TransactionsContext.Provider value={transactions}>
+            <TransactionsContext.Provider value={{ transactions, createTransaction }}>
                   {children}
             </TransactionsContext.Provider>
       )
