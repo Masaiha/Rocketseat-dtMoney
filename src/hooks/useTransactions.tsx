@@ -1,5 +1,5 @@
-import { createContext, ReactNode, useEffect, useState } from 'react';
-import { api } from './services/api';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { api } from '../services/api';
 
 interface Transaction {
       id: number,
@@ -12,7 +12,7 @@ interface Transaction {
 
 //Abaixo duas formas de criar um objeto com base em outro
 type TransactionInput = Omit<Transaction, 'id' | 'createAt'>;
-type TransactionInput2 = Pick<Transaction, 'title' | 'amount' | 'type' | 'category'>; 
+// type TransactionInput2 = Pick<Transaction, 'title' | 'amount' | 'type' | 'category'>; 
 
 interface TransactionsProviderChildrenProps {
       children: ReactNode;
@@ -23,14 +23,13 @@ interface TransactionsContextData {
        createTransaction: (transaction: TransactionInput) => Promise<void>;
 }
 
-export const TransactionsContext = createContext<TransactionsContextData>({} as TransactionsContextData);
+const TransactionsContext = createContext<TransactionsContextData>({} as TransactionsContextData);
 
 export function TransactionsProvider({ children }: TransactionsProviderChildrenProps){
       const [transactions, setTransactions] = useState<Transaction[]>([]);
 
       useEffect(() => {
-            api.get('transactions')
-                  .then(response => setTransactions(response.data.transactions))
+            api.get('transactions').then(response => setTransactions(response.data.transactions))
       }, []);
 
       async function createTransaction(transactionInput : TransactionInput){
@@ -47,4 +46,10 @@ export function TransactionsProvider({ children }: TransactionsProviderChildrenP
                   {children}
             </TransactionsContext.Provider>
       )
+}
+
+export function useTransactions(){
+      const context = useContext(TransactionsContext);
+
+      return context;
 }
